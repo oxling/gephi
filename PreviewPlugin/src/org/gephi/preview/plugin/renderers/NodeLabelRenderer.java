@@ -195,6 +195,10 @@ public class NodeLabelRenderer implements Renderer {
         FontMetrics fm = g2.getFontMetrics();
         float posX = x - fm.stringWidth(label) / 2f;
         float posY = y + fm.getDescent();
+        
+        FontRenderContext frc = g2.getFontRenderContext();
+        GlyphVector gv = font.createGlyphVector(frc, label);
+        Shape glyph = gv.getOutline(posX, posY);
 
         //Box
         if (showBox) {
@@ -206,16 +210,13 @@ public class NodeLabelRenderer implements Renderer {
 
         //Outline
         if (outlineSize > 0) {
-            FontRenderContext frc = g2.getFontRenderContext();
-            GlyphVector gv = font.createGlyphVector(frc, label);
-            Shape glyph = gv.getOutline(posX, posY);
             g2.setColor(outlineColor);
             g2.setStroke(new BasicStroke(outlineSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(glyph);
         }
-
+        
         g2.setColor(color);
-        g2.drawString(label, posX, posY);
+        g2.fill(glyph);
     }
 
     public void renderSVG(SVGTarget target, Node node, String label, float x, float y, int fontSize, Color color, float outlineSize, Color outlineColor, boolean showBox, Color boxColor) {
