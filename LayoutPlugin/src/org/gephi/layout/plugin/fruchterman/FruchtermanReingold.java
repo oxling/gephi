@@ -69,6 +69,7 @@ public class FruchtermanReingold extends AbstractLayout implements Layout {
     private float area;
     private double gravity;
     private double speed;
+    private boolean weighted;
 
     public FruchtermanReingold(LayoutBuilder layoutBuilder) {
         super(layoutBuilder);
@@ -126,12 +127,17 @@ public class FruchtermanReingold extends AbstractLayout implements Layout {
 
             Node Nf = E.getSource();
             Node Nt = E.getTarget();
-
+            
+            float weight = 1.0f;
+            if (weighted == true) {
+            	weight = E.getWeight();
+            }
+            
             float xDist = Nf.getNodeData().x() - Nt.getNodeData().x();
             float yDist = Nf.getNodeData().y() - Nt.getNodeData().y();
             float dist = (float) Math.sqrt(xDist * xDist + yDist * yDist);
 
-            float attractiveF = dist * dist / k;
+            float attractiveF = weight * dist * dist / k;
 
             if (dist > 0) {
                 ForceVectorNodeLayoutData sourceLayoutData = Nf.getNodeData().getLayoutData();
@@ -163,7 +169,7 @@ public class FruchtermanReingold extends AbstractLayout implements Layout {
             ForceVectorNodeLayoutData layoutData = n.getNodeData().getLayoutData();
             float xDist = layoutData.dx;
             float yDist = layoutData.dy;
-            float dist = (float) Math.sqrt(layoutData.dx * layoutData.dx + layoutData.dy * layoutData.dy);
+            float dist = (float) Math.sqrt(xDist * xDist + yDist * yDist);
             if (dist > 0 && !n.getNodeData().isFixed()) {
                 float limitedDist = Math.min(maxDisplace * ((float) speed / SPEED_DIVISOR), dist);
                 n.getNodeData().setX(n.getNodeData().x() + xDist / dist * limitedDist);
@@ -210,6 +216,13 @@ public class FruchtermanReingold extends AbstractLayout implements Layout {
                     "fruchtermanReingold.speed.name",
                     NbBundle.getMessage(FruchtermanReingold.class, "fruchtermanReingold.speed.desc"),
                     "getSpeed", "setSpeed"));
+            properties.add(LayoutProperty.createProperty(
+            		this, boolean.class,
+            		NbBundle.getMessage(FruchtermanReingold.class, "fruchtermanReingold.weighted.name"),
+            		FRUCHTERMAN_REINGOLD,
+            		"fruchtermanReingold.weighted.name",
+            		NbBundle.getMessage(FruchtermanReingold.class, "fruchtermanReingold.weighted.desc"),
+            		"getWeighted", "setWeighted"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -251,5 +264,19 @@ public class FruchtermanReingold extends AbstractLayout implements Layout {
      */
     public void setSpeed(Double speed) {
         this.speed = speed;
+    }
+    
+    /**
+     * @param weighted Whether or not to use edge weights
+     */
+    public void setWeighted(boolean weighted) {
+    	this.weighted = weighted;
+    }
+    
+    /**
+     * @return whether or not to use edge weights
+     */
+    public boolean getWeighted() {
+    	return weighted;
     }
 }
